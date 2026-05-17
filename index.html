@@ -1,159 +1,1157 @@
-<!DOCTYPE HTML>
-<!--
-	
--->
-<html>
-	<head>
-		<title>Kaleb Key</title>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
-	<body class="landing is-preload">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaleb Key — Portfolio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;1,300&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#c9b48a; --forest:#3a4f28; --forest-dim:rgba(58,79,40,0.45);
+  --ink:#1e2810; --ink-dim:rgba(30,40,16,0.5);
+  --surface:rgba(242,234,216,0.96); --cream:#f2ead8;
+}
+html,body{width:100%;height:100%;background:var(--bg);overflow:hidden;font-family:'Syne',sans-serif;color:var(--ink);cursor:default;}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:2;background:radial-gradient(circle at 50% 48%,rgba(242,234,216,0) 0 44%,rgba(30,40,16,0.08) 78%,rgba(30,40,16,0.18) 100%);}
+#canvas-wrap{position:fixed;inset:0;}
+canvas{display:block;transition:filter 0.55s ease,opacity 0.55s ease;}
+body.entering-project canvas{filter:blur(4px) brightness(0.68) saturate(0.82);opacity:0.78;}
 
-		<!-- Page Wrapper -->
-			<div id="page-wrapper">
+/* ── HUD ── */
+#hud{position:fixed;top:48px;left:56px;z-index:20;display:flex;flex-direction:column;gap:6px;pointer-events:all;}
+#hud-name-row{display:flex;align-items:flex-start;gap:10px;}
+#hud h1{font-size:clamp(26px,3.2vw,46px);font-weight:800;letter-spacing:-0.02em;line-height:1;color:var(--ink);pointer-events:none;}
+#hud h1 span{color:var(--forest);}
+#hud-tagline{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;color:var(--ink-dim);text-transform:uppercase;pointer-events:none;}
+#info-trigger{width:22px;height:22px;border-radius:50%;background:rgba(58,79,40,0.12);border:1.5px solid var(--forest-dim);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:5px;flex-shrink:0;transition:background 0.2s,border-color 0.2s;font-family:'DM Mono',monospace;font-size:11px;font-style:italic;font-weight:600;color:var(--forest);}
+#info-trigger:hover{background:rgba(58,79,40,0.22);border-color:var(--forest);}
 
-				<!-- Header -->
-					<header id="header" class="alt">
-						<h1><a href="index.html">Kaleb C. Key</a></h1>
-						<nav id="nav">
-							<ul>
-								<li class="special">
-									<a href="#menu" class="menuToggle"><span>Menu</span></a>
-									<div id="menu">
-										<ul>
-											<li><a href="index.html">Home</a></li>
-											<li><a href="generic.html">About</a></li>
-											<li><a href="elements.html">Resume</a></li>
+/* ── LEGEND ── */
+#legend{position:fixed;bottom:48px;left:56px;z-index:10;display:flex;flex-direction:column;gap:10px;}
+.leg-item{display:flex;align-items:center;gap:10px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-dim);cursor:pointer;transition:color 0.18s,transform 0.18s;}
+.leg-item:hover,.leg-item.active{color:var(--forest);transform:translateX(3px);}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.orbit-toggle{position:fixed;right:56px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-dim);z-index:10;background:rgba(242,234,216,0.16);border:1px solid rgba(58,79,40,0.1);border-radius:8px;padding:7px 10px;cursor:pointer;opacity:0.48;transition:opacity 0.2s,background 0.2s,border-color 0.2s;color:rgba(30,40,16,0.55);}
+.orbit-toggle:hover{opacity:1;background:rgba(242,234,216,0.72);border-color:rgba(58,79,40,0.28);color:var(--forest);}
+#gh-hint{bottom:48px;}
+#sat-hint{bottom:14px;}
+#project-dock{position:fixed;left:50%;bottom:38px;z-index:12;display:flex;align-items:center;gap:8px;transform:translateX(-50%);background:rgba(242,234,216,0.18);border:1px solid rgba(58,79,40,0.08);border-radius:10px;padding:7px;backdrop-filter:blur(10px);opacity:0.2;transition:opacity 0.22s,background 0.22s,border-color 0.22s,box-shadow 0.22s;}
+#project-dock:hover,#project-dock:focus-within{opacity:1;background:rgba(242,234,216,0.82);border-color:rgba(58,79,40,0.32);box-shadow:0 10px 36px rgba(30,40,16,0.14);}
+.dock-btn{width:34px;height:30px;border:1px solid rgba(58,79,40,0.22);border-radius:7px;background:rgba(58,79,40,0.08);color:var(--forest);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;transition:background 0.18s,border-color 0.18s,transform 0.18s;}
+.dock-btn:hover{background:rgba(58,79,40,0.16);border-color:var(--forest-dim);transform:translateY(-1px);}
+#dock-status{min-width:104px;text-align:center;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-dim);}
+.dock-link{width:auto;padding:0 10px;}
+#focus-reticle{position:fixed;z-index:45;width:46px;height:46px;border:1px solid rgba(242,234,216,0.72);border-radius:50%;pointer-events:none;opacity:0;transform:translate(-50%,-50%) scale(0.78);transition:opacity 0.16s,transform 0.16s;}
+#focus-reticle::before,#focus-reticle::after{content:"";position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(58,79,40,0.54);}
+#focus-reticle.visible{opacity:1;transform:translate(-50%,-50%) scale(1);}
 
-										</ul>
-									</div>
-								</li>
-							</ul>
-						</nav>
-					</header>
+/* ── TOOLTIP ── */
+#tooltip{position:fixed;pointer-events:none;z-index:50;opacity:0;transition:opacity 0.18s;transform:translate(-50%,calc(-100% - 18px));}
+#tooltip.visible{opacity:1;}
+#tt-inner{background:var(--surface);border:1px solid var(--forest-dim);border-radius:10px;padding:12px 16px;min-width:160px;backdrop-filter:blur(12px);box-shadow:0 4px 24px rgba(30,40,16,0.15);}
+#tt-cat{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;}
+#tt-name{font-size:14px;font-weight:600;color:var(--ink);}
+#tt-hint{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-dim);margin-top:6px;}
 
-				<!-- Banner -->
-					<section id="banner">
-						<div class="inner">
-							<h2>Kaleb C. Key</h2>
-							<p>An exhibition of my<br />
-							projects and technical abilities<br />
-							</p>
-							
-						</div>
-						<a href="#one" class="more scrolly"></a>
-					</section>
+/* ── MOON LABEL ── */
+#moon-label{position:fixed;pointer-events:none;z-index:50;opacity:0;transition:opacity 0.2s,transform 0.2s;transform:translate(-50%,calc(-100% - 14px)) scale(0.96);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--forest);background:var(--surface);border:1px solid var(--forest-dim);padding:5px 10px;border-radius:6px;}
+#moon-label.visible{opacity:1;transform:translate(-50%,calc(-100% - 18px)) scale(1);}
 
-				<!-- One -->
-					<section id="one" class="wrapper style1 special">
-						<div class="inner">
-							<header class="major">
-								<h2>Notable projects</h2>
-								<p>A brief sample of projects that have allowed me to demonstrate my <br />
-								engineering, digital, circuit, and programming skills.</p>
-							</header>
-							
-						</div>
-					</section>
+/* ── ENTRY + SIMPLE MODE ── */
+#splash,#simple-view{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:rgba(201,180,138,0.62);backdrop-filter:blur(18px);transition:opacity 0.28s,visibility 0.28s;}
+#splash.hidden,#simple-view.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+.splash-panel,.simple-panel{width:min(760px,92vw);max-height:88vh;overflow:auto;background:rgba(242,234,216,0.94);border:1px solid rgba(58,79,40,0.28);border-radius:18px;box-shadow:0 24px 80px rgba(30,40,16,0.18);}
+.splash-panel{padding:38px 42px;}
+.splash-kicker,.simple-kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--forest);margin-bottom:10px;}
+.splash-title{font-size:clamp(34px,6vw,62px);line-height:0.94;font-weight:800;letter-spacing:0;margin-bottom:18px;color:var(--ink);}
+.splash-copy{max-width:590px;font-size:15px;line-height:1.75;color:rgba(30,40,16,0.76);margin-bottom:24px;}
+.splash-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:26px;}
+.splash-tip{border:1px solid rgba(58,79,40,0.18);border-radius:10px;padding:12px 14px;background:rgba(58,79,40,0.05);}
+.tip-key{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--forest);margin-bottom:5px;}
+.tip-body{font-size:12px;line-height:1.55;color:var(--ink-dim);}
+.splash-actions{display:flex;flex-wrap:wrap;gap:10px;}
+.primary-action,.secondary-action{border-radius:10px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.08em;padding:11px 16px;cursor:pointer;transition:transform 0.18s,background 0.18s,border-color 0.18s;}
+.primary-action{border:1px solid var(--forest);background:var(--forest);color:var(--cream);}
+.secondary-action{border:1px solid rgba(58,79,40,0.28);background:rgba(58,79,40,0.07);color:var(--forest);}
+.primary-action:hover,.secondary-action:hover{transform:translateY(-1px);}
+.simple-panel{padding:0;}
+.simple-head{position:sticky;top:0;z-index:2;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:26px 30px;background:rgba(242,234,216,0.96);border-bottom:1px solid rgba(58,79,40,0.16);}
+.simple-title{font-size:26px;font-weight:800;line-height:1;color:var(--ink);}
+.simple-sections{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;padding:24px 30px 30px;}
+.simple-section h3{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:10px;}
+.simple-project{width:100%;text-align:left;border:1px solid rgba(58,79,40,0.18);border-radius:10px;background:rgba(58,79,40,0.05);padding:12px 13px;margin-bottom:9px;cursor:pointer;transition:background 0.18s,border-color 0.18s,transform 0.18s;}
+.simple-project:hover{background:rgba(58,79,40,0.1);border-color:rgba(58,79,40,0.36);transform:translateY(-1px);}
+.simple-project-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.simple-project-meta{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--ink-dim);}
 
-				<!-- Two -->
-					<section id="two" class="wrapper alt style2">
-						<section class="spotlight">
-							<div class="image"><img src="images/pic01.jpg" alt="" /></div><div class="content">
-								<h2>Analysis of Activities based<br />
-									on a Single-Shoe Equipped with Force Sensors</h2>
-								<p>I created a pressure sensing smart-shoe out of velostat material and an embedded system. I then collected data of movements from different physical activities 
-									before using this data to train a decision tree model for real time activity detection. <a href="https://github.com/kckey/Smart-Shoe-Sensor">[View Repository]</a>
-								</p>
-								<P>
-								Publication: Kaleb Key, Spencer Mason, Billy Kihei, “Analysis of Activities based on a Single-Shoe Equipped with force Sensors”, in IEEE Smart Cities Conference 2021, 7-10 Sept. 2021.
-								</p>
-							</div>
-						</section>
-						<section class="spotlight">
-							<div class="image"><img src="images/pic02.jpg" alt="" /></div><div class="content">
-								<h2>Consumer Facing Smart Shoe Controlled by Embedded System</h2>
-								<p>For my undergraduate senior design project I created a smart shoe with integrated sensors and actuators (accelerometer,weight sensors, ultrasonic sensor, vibration motor.) as well as inductive charging capabilities.<br />
-								My role on the team was the design architech. I designed the hardware system and sensor layout, whcih involved designing the circuits and positioning of the components. As well as the software system layout, which involved organizing the system drivers and scripts.
-								<a href="https://github.com/kckey/AssortedBytes-SmartShoeSystem-">[View Repository]</a>
-							</p>
-							</div>
-						</section>
-						<section class="spotlight">
-							<div class="image"><img src="images/pic03.jpg" alt="" /></div><div class="content">
-								<h2>Two Player reaction game programmed <br />
-								 onto FPGA in VHDL with VGA output</h2>
-								<p>Using VHDL and the Basys-3 Artix 7 FPGA I created a game where two players race to hit the switch corresponding to a random light lit up on the board. The current winner is displayed out through VGA signal as either red or blue.
-									<a href="https://github.com/kckey/VGA_Game">[View Repository]</a>	
-								</p>
-							</div>
-						</section>
-						<section class="spotlight">
-							<div class="image"><img src="images/pic06.jpg" alt="" /></div><div class="content">
-								<h2>Python Based Point of Sale System</h2>
-								<p>Used Python to write an application that serves as a text based POS system that organizes data and creates an order log for the user.[GUI in progress]
-									<a href="https://github.com/kckey/Point-of-sale-system">[View Repository]</a>		
-								</p>
-							</div>
-						</section>
-					</section>
+/* ── INFO PANEL ── */
+#info-panel{position:fixed;top:42px;left:56px;z-index:90;background:var(--surface);border:1px solid var(--forest-dim);border-radius:18px;padding:32px 36px;width:min(380px,88vw);box-shadow:0 16px 48px rgba(30,40,16,0.18);opacity:0;pointer-events:none;transform:translateY(-8px) scale(0.97);transition:opacity 0.22s,transform 0.22s;}
+#info-panel.open{opacity:1;pointer-events:all;transform:translateY(0) scale(1);}
+.ip-close{position:absolute;top:16px;right:18px;background:none;border:1px solid rgba(30,40,16,0.15);border-radius:7px;color:var(--ink-dim);font-family:'DM Mono',monospace;font-size:11px;padding:5px 10px;cursor:pointer;transition:border-color 0.2s,color 0.2s;}
+.ip-close:hover{border-color:var(--forest-dim);color:var(--forest);}
+.ip-name{font-size:20px;font-weight:800;letter-spacing:-0.01em;color:var(--ink);margin-bottom:4px;}
+.ip-name span{color:var(--forest);}
+.ip-role{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.13em;text-transform:uppercase;color:var(--forest);margin-bottom:18px;}
+.ip-bio{font-size:14px;line-height:1.75;color:rgba(30,40,16,0.75);margin-bottom:22px;}
+.ip-divider{width:100%;height:1px;background:rgba(58,79,40,0.15);margin-bottom:20px;}
+.ct-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.ct-row:last-child{margin-bottom:0;}
+.ct-icon{width:30px;height:30px;border-radius:8px;background:rgba(58,79,40,0.08);border:1px solid rgba(58,79,40,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ct-icon svg{width:14px;height:14px;stroke:var(--forest);}
+.ct-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:1px;}
+.ct-val{font-size:13px;font-weight:500;color:var(--ink);}
+.ct-val a{color:var(--forest);text-decoration:none;}
+.ct-val a:hover{text-decoration:underline;}
 
-				<!-- Three -->
-					<section id="three" class="wrapper style3 special">
-						<div class="inner">
-							<header class="major">
-								<h2>Other Noteworthy Projects</h2>
-								<p>Additional projects and projects in progress</p>
-							</header>
-							<ul class="features">
-								<li class="icon solid fa-gamepad">
-									<h3>Memory Game</h3>
-									<p>Wrote an application in C that used the built in LEDs of an STM32l4 board to flash the lights in a random pattern and then determined if the users input was the same with a green or red flash.<a href="https://github.com/kckey/STM32-Memory-Game">[View]</a> </p>
-								</li>
-								<li class="icon solid fa-car">
-									<h3>Rental Car System</h3>
-									<p>Wrote an application in C++ that allows employees of different levels to operate a rental car application which checks out cars based on various factors. [in progress] <a href="https://github.com/kckey/RentalCarApp">[View]</a> </p>
-								</li>
-								<li class="icon solid fa-cogs">
-									<h3>Self-Watering-Plant</h3>
-									<p>Created an application in python and embedded system that utilizes a electric water pump, and soil moisture sensor to automatically water a plant. [in progress] <a href="https://github.com/kckey/Self-Watering-Plant">[View]</a> </p>
-								</li>
-								<li class="icon solid fa-shopping-bag">
-									<h3>Pocket Closet Application</h3>
-									<p>Created an IOS application written in Swift that allows a user to take photos of their clothes, categorize them, and archive them. So that the user would then be able to create outfit combinations from their phone. [in progress]</p>
-								</li>
-								
-							</ul>
-						</div>
-					</section>
+/* ── SHARED MODAL BASE ── */
+.m-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(180,158,112,0.5);backdrop-filter:blur(10px);opacity:0;pointer-events:none;transition:opacity 0.28s;}
+.m-overlay.open{opacity:1;pointer-events:all;}
+.m-card{background:var(--surface);border:1px solid var(--forest-dim);border-radius:20px;padding:40px 44px;max-width:560px;width:min(90vw,680px);position:relative;transform:translateY(24px) scale(0.98);transition:transform 0.28s,opacity 0.28s;opacity:0;box-shadow:0 20px 64px rgba(30,40,16,0.2);}
+.m-overlay.open .m-card{transform:translateY(0) scale(1);opacity:1;}
+.m-card.hidden{display:none;}
+.m-close{position:absolute;top:20px;right:24px;background:none;border:1px solid rgba(30,40,16,0.2);border-radius:8px;color:var(--ink-dim);font-family:'DM Mono',monospace;font-size:12px;padding:6px 12px;cursor:pointer;transition:border-color 0.2s,color 0.2s;}
+.m-close:hover{border-color:var(--forest-dim);color:var(--forest);}
+.m-cat{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;margin-bottom:10px;}
+.m-title{font-size:clamp(24px,3.2vw,40px);font-weight:800;letter-spacing:0;margin-bottom:16px;line-height:1.08;color:var(--ink);}
+.m-desc{font-size:15px;line-height:1.78;color:rgba(30,40,16,0.72);margin-bottom:20px;}
+.m-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.tag{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;padding:5px 12px;border-radius:6px;border:1px solid var(--forest-dim);color:var(--forest);background:rgba(58,79,40,0.08);}
+.m-year{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;color:var(--ink-dim);margin-bottom:24px;}
+.m-nav{display:flex;gap:8px;margin-bottom:18px;}
+.m-nav button{border:1px solid rgba(30,40,16,0.2);border-radius:8px;background:rgba(58,79,40,0.06);color:var(--forest);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.08em;padding:7px 11px;cursor:pointer;transition:border-color 0.18s,background 0.18s;}
+.m-nav button:hover{border-color:var(--forest-dim);background:rgba(58,79,40,0.12);}
+.btn-expand{display:inline-flex;align-items:center;gap:8px;background:var(--forest);color:var(--cream);border:none;border-radius:10px;font-family:'DM Mono',monospace;font-size:12px;letter-spacing:0.08em;padding:10px 20px;cursor:pointer;transition:background 0.2s,transform 0.15s;}
+.btn-expand:hover{background:#4a6434;transform:translateY(-1px);}
+.btn-expand svg{width:14px;height:14px;flex-shrink:0;}
 
-			
+/* ── EXPANDED PANEL ── */
+.m-expanded{background:var(--surface);border:1px solid var(--forest-dim);border-radius:20px;width:min(860px,94vw);max-height:88vh;overflow-y:auto;position:relative;transform:translateY(24px) scale(0.98);transition:transform 0.28s,opacity 0.28s;opacity:0;box-shadow:0 20px 64px rgba(30,40,16,0.2);display:none;}
+.m-overlay.open .m-expanded{transform:translateY(0) scale(1);opacity:1;}
+.m-expanded.visible{display:block;}
+.m-expanded::-webkit-scrollbar{width:6px;}
+.m-expanded::-webkit-scrollbar-thumb{background:var(--forest-dim);border-radius:3px;}
+.exp-header{padding:36px 44px 28px;border-bottom:1px solid rgba(58,79,40,0.2);}
+.exp-body{padding:32px 44px;}
+.exp-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:32px;}
+.gslot{aspect-ratio:4/3;border-radius:12px;border:1.5px dashed var(--forest-dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(58,79,40,0.05);color:var(--ink-dim);font-family:'DM Mono',monospace;font-size:11px;text-align:center;padding:16px;cursor:pointer;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
+.gslot:hover{background:rgba(58,79,40,0.1);border-color:var(--forest);}
+.gslot svg{width:28px;height:28px;opacity:0.4;}
+.gslot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:11px;}
+.gslot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.sec-lbl{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--forest);margin-bottom:16px;}
+.steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:32px;}
+.step-card{background:rgba(58,79,40,0.06);border:1px solid rgba(58,79,40,0.18);border-radius:12px;padding:16px 18px;}
+.step-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--forest);margin-bottom:6px;letter-spacing:0.1em;}
+.step-title{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:4px;}
+.step-body{font-size:12px;line-height:1.6;color:var(--ink-dim);}
+.out-lbl{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--forest);margin-bottom:12px;}
+.out-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;font-size:14px;line-height:1.6;color:rgba(30,40,16,0.8);}
+.out-dot{width:6px;height:6px;border-radius:50%;background:var(--forest);flex-shrink:0;margin-top:8px;}
+.btn-back{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid rgba(30,40,16,0.2);border-radius:8px;color:var(--ink-dim);font-family:'DM Mono',monospace;font-size:12px;padding:7px 14px;cursor:pointer;margin-bottom:20px;transition:border-color 0.2s,color 0.2s;}
+.btn-back:hover{border-color:var(--forest-dim);color:var(--forest);}
 
-				<!-- Footer -->
-					<footer id="footer">
-						<ul class="icons">
-							<li><a href="https://www.linkedin.com/in/kalebckey/" class="icon brands fa-linkedin"><span class="label">Linkedin</span></a></li>
-							<li><a href="https://github.com/kckey" class="icon brands fa-github"><span class="label">github</span></a></li>
-							<li><a href="mailto:kalebckey@gmail.com" class="icon solid fa-envelope"><span class="label">Email</span></a></li>
-						</ul>
-						<ul class="copyright">
-							<li>&copy; 2021 Kaleb Key </li>
-						</ul>
-					</footer>
+/* ── SAT MODAL ── */
+#sat-img-slot{width:100%;aspect-ratio:4/3;border-radius:12px;border:1.5px dashed var(--forest-dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(58,79,40,0.05);color:var(--ink-dim);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
+#sat-img-slot:hover{background:rgba(58,79,40,0.1);border-color:var(--forest);}
+#sat-img-slot svg{width:32px;height:32px;opacity:0.35;}
+#sat-img-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:11px;}
+#sat-img-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
 
-			</div>
+body.hovering{cursor:pointer;}
+@media (max-width:720px){
+  #hud{top:24px;left:24px;right:20px;}
+  #hud h1{font-size:34px;}
+  #hud-tagline{font-size:9px;line-height:1.6;max-width:250px;}
+  #legend{left:24px;bottom:92px;gap:7px;}
+  .leg-item{font-size:9px;}
+  .orbit-toggle{right:24px;font-size:9px;}
+  #gh-hint{bottom:124px;}
+  #sat-hint{bottom:92px;}
+  #project-dock{bottom:22px;}
+  .splash-panel{padding:30px 24px;}
+  .splash-grid,.simple-sections{grid-template-columns:1fr;}
+  .simple-head{align-items:stretch;flex-direction:column;}
+  .m-card{padding:34px 28px;max-height:86vh;overflow-y:auto;}
+  .m-title{font-size:clamp(22px,8vw,34px);}
+  .m-expanded{width:92vw;}
+  .exp-header,.exp-body{padding-left:24px;padding-right:24px;}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition:none!important;animation:none!important;}
+}
+</style>
+</head>
+<body>
+<div id="canvas-wrap"><canvas id="c"></canvas></div>
 
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/jquery.scrollex.min.js"></script>
-			<script src="assets/js/jquery.scrolly.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
+<!-- HUD -->
+<div id="hud">
+  <div id="hud-name-row">
+    <h1>Kaleb <span>Key</span></h1>
+    <div id="info-trigger" title="About me">i</div>
+  </div>
+  <div id="hud-tagline">Robotics · HCI · Industrial Design · Engineering</div>
+</div>
 
-	</body>
+<!-- Info panel -->
+<div id="info-panel">
+  <button class="ip-close" id="info-close">close</button>
+  <div class="ip-name">Kaleb <span>Key</span></div>
+  <div class="ip-role">Design-Focused Engineer · MS Robotics</div>
+  <div class="ip-bio">I turn complex systems into intuitive, data-driven experiences. With a master's degree in robotics and expertise in CAD, UX/UI design, and machine learning, I build scalable solutions that improve efficiency and elevate the user experience.</div>
+  <div class="ip-divider"></div>
+  <div class="ct-row">
+    <div class="ct-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+    <div><div class="ct-lbl">Email</div><div class="ct-val"><a href="mailto:your@email.com">your@email.com</a></div></div>
+  </div>
+  <div class="ct-row">
+    <div class="ct-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div>
+    <div><div class="ct-lbl">GitHub</div><div class="ct-val"><a href="https://github.com/kalebkey" target="_blank">github.com/kalebkey</a></div></div>
+  </div>
+  <div class="ct-row">
+    <div class="ct-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+    <div><div class="ct-lbl">Website</div><div class="ct-val"><a href="https://www.kalebkey.info" target="_blank">kalebkey.info</a></div></div>
+  </div>
+  <div class="ct-row">
+    <div class="ct-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
+    <div><div class="ct-lbl">LinkedIn</div><div class="ct-val"><a href="https://linkedin.com/in/kalebkey" target="_blank">linkedin.com/in/kalebkey</a></div></div>
+  </div>
+</div>
+
+<div id="legend"></div>
+<button id="gh-hint" class="orbit-toggle" title="Pause moon orbit">moon orbit: pause</button>
+<button id="sat-hint" class="orbit-toggle" title="Pause satellite orbit">sat orbit: pause</button>
+<div id="tooltip"><div id="tt-inner"><div id="tt-cat"></div><div id="tt-name"></div><div id="tt-hint">click to explore</div></div></div>
+<div id="moon-label">GitHub ↗</div>
+<div id="focus-reticle"></div>
+<div id="project-dock">
+  <button class="dock-btn" id="dock-prev" title="Previous project">←</button>
+  <button class="dock-btn" id="dock-pause" title="Pause rotation">Ⅱ</button>
+  <button class="dock-btn" id="dock-next" title="Next project">→</button>
+  <button class="dock-btn dock-link" id="dock-simple" title="Simple project list">list</button>
+  <div id="dock-status">orbiting</div>
+</div>
+
+<div id="splash">
+  <div class="splash-panel">
+    <div class="splash-kicker">Interactive portfolio</div>
+    <div class="splash-title">Explore Kaleb Key's project planet.</div>
+    <div class="splash-copy">Each continent is a discipline. Each node is a project. Rotate the globe, hover nodes for previews, click a project to enter it, or use the simple list if you want a straightforward project index.</div>
+    <div class="splash-grid">
+      <div class="splash-tip"><div class="tip-key">Drag</div><div class="tip-body">Rotate the planet and scan project continents.</div></div>
+      <div class="splash-tip"><div class="tip-key">Hover / click</div><div class="tip-body">Preview a node, then enter the selected project.</div></div>
+      <div class="splash-tip"><div class="tip-key">Moon</div><div class="tip-body">The orbiting moon links out to GitHub.</div></div>
+      <div class="splash-tip"><div class="tip-key">Bottom controls</div><div class="tip-body">Step through projects, pause orbit, or open the list view.</div></div>
+    </div>
+    <div class="splash-actions">
+      <button class="primary-action" id="enter-globe">enter globe</button>
+      <button class="secondary-action" id="enter-simple">simple version</button>
+    </div>
+  </div>
+</div>
+
+<div id="simple-view" class="hidden">
+  <div class="simple-panel">
+    <div class="simple-head">
+      <div>
+        <div class="simple-kicker">Simple version</div>
+        <div class="simple-title">Projects by section</div>
+      </div>
+      <div class="splash-actions">
+        <button class="secondary-action" id="simple-back">back to globe</button>
+      </div>
+    </div>
+    <div class="simple-sections" id="simple-sections"></div>
+  </div>
+</div>
+
+<!-- Project modal -->
+<div class="m-overlay" id="proj-overlay">
+  <div class="m-card" id="proj-card">
+    <button class="m-close" id="proj-close">ESC / close</button>
+    <div class="m-cat" id="pc-cat"></div>
+    <div class="m-title" id="pc-title"></div>
+    <div class="m-desc" id="pc-desc"></div>
+    <div class="m-tags" id="pc-tags"></div>
+    <div class="m-year" id="pc-year"></div>
+    <div class="m-nav"><button id="proj-prev">← prev</button><button id="proj-next">next →</button></div>
+    <button class="btn-expand" id="btn-expand">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+      View full project
+    </button>
+  </div>
+  <div class="m-expanded" id="proj-expanded">
+    <div class="exp-header">
+      <button class="btn-back" id="btn-back">← back</button>
+      <div class="m-cat" id="pe-cat"></div>
+      <div class="m-title" id="pe-title"></div>
+      <div class="m-tags" id="pe-tags"></div>
+      <div class="m-year" id="pe-year"></div>
+    </div>
+    <div class="exp-body">
+      <div class="sec-lbl">Project images</div>
+      <div class="exp-gallery" id="pe-gallery"></div>
+      <div class="sec-lbl">Process</div>
+      <div class="steps-grid" id="pe-steps"></div>
+      <div class="out-lbl">Key outcomes</div>
+      <div id="pe-outcomes"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Satellite modal -->
+<div class="m-overlay" id="sat-overlay">
+  <div class="m-card" id="sat-card">
+    <button class="m-close" id="sat-close">ESC / close</button>
+    <div class="m-cat" id="sat-lbl-el">Satellite 01</div>
+    <div class="m-title" style="font-size:20px;margin-bottom:20px;">Featured Image</div>
+    <div id="sat-img-slot">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <span>Click to add image</span>
+      <input type="file" accept="image/*" id="sat-file">
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const DISCS = [
+  { id:'id', label:'Industrial Design', color:'#3a4f28', hex:0x3a4f28, center:{t:1.18,p:0.32},
+    projects:[
+      {name:'Adaptive Hair Dryer',images:['images/projects/hair-dryer-1.jpg','images/projects/hair-dryer-2.jpg','images/projects/hair-dryer-3.jpg'],desc:'A hand-strap hair dryer conceived as an extension of the body — not a tool you must hold. Designed for users with limited grip strength, featuring heat-sensitive silicone, adaptive power, and a touch-switch for one-handed use.',tags:['Accessibility','CAD','Ergonomics','Inclusive Design'],year:'Dec 2025',steps:[{title:'User Research',body:'Observed everyday users handling hair tools; identified friction points for people with grip limitations or shakiness.'},{title:'Ideation',body:'Sketched hand-mount concepts, exploring cradle geometry and strap configurations for one-handed stability.'},{title:'CAD Modeling',body:'Developed 3D chassis in SolidWorks, iterating on airflow geometry, weight balance, and silicone sleeve form.'},{title:'Prototyping',body:'Built foam and 3D-printed prototypes to validate hand conformity and heat dissipation paths.'}],outcomes:['Touch-switch eliminates need for a separate control panel','Heat-sensitive silicone sleeve protects skin during use','Adjustable power settings for all hair types','Usable single-handed or with adaptive grips']},
+      {name:'Countertop Cleaning Robot',images:['images/projects/cleaning-robot-1.jpg','images/projects/cleaning-robot-2.jpg','images/projects/cleaning-robot-3.jpg'],desc:'A compact countertop robot with a dual-mode system — vacuum for dry debris and brush-steam combo for sticky residue. Touch-free activation and a sensor array that learns your kitchen layout.',tags:['Robotics','Consumer Product','CAD','Sensing'],year:'Nov 2025',steps:[{title:'Problem Framing',body:'Researched kitchen workflows to identify where countertop mess interrupts cooking flow.'},{title:'Concept Development',body:'Defined dual-mode cleaning, wheel-track edge-following, and lightweight chassis constraints.'},{title:'Sensor Design',body:'Specced ultrasonic proximity sensors and a learning layout map for obstacle avoidance.'},{title:'CAD & Drawings',body:'Produced full engineering drawings with isometric views and internal component layout.'}],outcomes:['Dual-mode: vacuum for dry debris, brush-steam for residue','Touch-free activation and audible cues for hearing-impaired users','Sensor array learns kitchen layout over time','Low-profile footprint nests beside sink or stove']},
+      {name:'Modular Smartphone System',images:['images/projects/smartphone-1.jpg','images/projects/smartphone-2.jpg','images/projects/smartphone-3.jpg'],desc:'A smartphone with a circular modular hub on the back enabling swappable attachments — camera lenses, microphones, stands — via a high-bitrate locking pin system.',tags:['Modular Design','HCI','CAD','Innovation'],year:'Aug 2025',steps:[{title:'Observation',body:'Studied photographers and makers who carry multiple devices to accomplish what one modular phone could do.'},{title:'Pin System Design',body:'Engineered a locking pin mechanism transferring high-bitrate data to attachments with single-tap release.'},{title:'Lens Integration',body:'Camera sensor placed inside the attachment lens — keeps phone chassis thin while enabling mirrorless-quality capture.'},{title:'Accessibility',body:'Touch-less plug-in and quick-release button for users with limited dexterity.'}],outcomes:['Circular bay accepts any attachment in seconds','High-bitrate locking pin for professional peripherals','Keeps full smartphone portability when detached','Accessible quick-release for limited dexterity users']},
+      {name:'Countertop Bartending Machine',images:['images/projects/bartender-1.jpg','images/projects/bartender-2.jpg','images/projects/bartender-3.jpg'],desc:'An automated bartending machine with modular bottle cradles and an intelligent algorithm that calculates proportions and dispenses balanced drinks.',tags:['Mechatronics','CAD','Fluid Systems','Accessibility'],year:'March 2025',steps:[{title:'Concept',body:'Envisioned a hosting appliance freeing the host to focus on guests while drinks are prepared automatically.'},{title:'Pump System',body:'Designed fluid pumps to insert directly into user-supplied bottles of any size.'},{title:'Algorithm',body:'Developed volume-reading logic that calculates proportions and sequences dispense operations.'},{title:'Fabrication',body:'Full engineering drawings produced; brought to physical prototype fruition.'}],outcomes:['Modular bottle slots accept any beverage','Intelligent algorithm ensures consistent proportions','Hands-free interface with adjustable mixing speed','Low-profile footprint fits standard countertops']},
+    ]},
+  { id:'rob', label:'Robotics & Engineering', color:'#8c3a28', hex:0x8c3a28, center:{t:0.52,p:2.55},
+    projects:[
+      {name:'Robotic Swarm Simulation',images:['images/projects/swarm-1.jpg','images/projects/swarm-2.jpg','images/projects/swarm-3.jpg'],desc:'Swarm Studio — a Tkinter sandbox for swarm coordination. Animated robots toward points or user-drawn paths using normalized vector stepping and waypoint indexing. Scalable to 100-robot ROS deployments.',tags:['ROS','Python','Swarm Robotics','Simulation'],year:'Dec 2025',steps:[{title:'Core Loop',body:'Calculated vector from each robot to target; normalized step guarantees smooth motion without overshoot.'},{title:'Path Following',body:'Waypoint index increments once a robot reaches a waypoint — mirrors multi-robot trajectory traversal.'},{title:'Scaling',body:'Validated from 20 to 100-robot simulation; same vector math drives drones or ground robots in ROS.'},{title:'ROS Roadmap',body:'Designed to replace Tkinter with RViz, publishing robot poses on /robot/pose topics.'}],outcomes:['Smooth motion without overshoot via normalized vector stepping','Supports point-click and user-drawn path following','Architecture translates directly to ROS velocity commands','Scales from 20 to 100+ robot swarms']},
+      {name:'Smart-Intersection Traffic Sensor',images:['images/projects/traffic-1.jpg','images/projects/traffic-2.jpg','images/projects/traffic-3.jpg'],desc:'4-way intersection simulation using V2X logic. LIDAR-based vehicle positioning feeds a state machine (approach → waiting → crossing → done), with V2X packets broadcasting right-of-way signals.',tags:['V2X','LIDAR','State Machine','Smart City'],year:'Nov 2025',steps:[{title:'State Machine',body:'Car lifecycle mirrors real V2X go-signal reception: approach, waiting, crossing, done.'},{title:'LIDAR Integration',body:'Projects vehicles onto road plane, computes distance to stop sign via vector subtraction.'},{title:'V2X Logic',body:'Radio packets carry direction, queue index, and green flag. Priority queue arbitrates right-of-way.'},{title:'Blueprint',body:'Architecture swaps hard-coded coordinates for real sensor outputs — LIDAR, V2X, ultrasonic.'}],outcomes:['State machine cleanly models real intersection V2X behavior','Priority queue ensures fair right-of-way arbitration','LIDAR + ultrasonic dual-confirmation reduces false positives','Blueprint-ready for real sensor integration']},
+      {name:'Robotic Course Navigation',images:['images/projects/navigation-1.jpg','images/projects/navigation-2.jpg','images/projects/navigation-3.jpg'],desc:'A* pathfinding in Python/Pygame for maze navigation. Converts grid paths into compact motor instructions. Designed for ROS integration via nav_msgs/Path publications.',tags:['A*','Python','ROS','Path Planning'],year:'Jan 2025',steps:[{title:'Grid Model',body:'Walls drawn as rectangles blocking movement; user sets start/end and drags obstacles in real time.'},{title:'A* Search',body:'Manhattan distance heuristic, heapq priority queue ensures optimality by exploring neighbors in order of estimated cost.'},{title:'Instruction Compression',body:'Converts cell sequences into compact instructions — MOVE RIGHT x3, DOWN x2.'},{title:'ROS Integration',body:'Modular design wraps into ROS node, publishing nav_msgs/Path to motor command interpreter.'}],outcomes:['Interactive obstacle drawing with real-time pathfinding','Compact instruction output for direct controller use','Manhattan distance heuristic ensures optimal paths','Architecture ready for ROS nav_msgs/Path publication']},
+    ]},
+  { id:'ux', label:'Software & UX/UI', color:'#5a3e28', hex:0x5a3e28, center:{t:1.58,p:4.02},
+    projects:[
+      {name:'Drone Delivery Status Monitor',images:['images/projects/drone-1.jpg','images/projects/drone-2.jpg','images/projects/drone-3.jpg'],desc:'App interface for business owners to set drone drop-off points with real-time tracking. Focused on accessibility — enabling delivery of medication and essentials to people with limited mobility.',tags:['Mobile UX','Maps API','Real-Time','Figma'],year:'July 2025',steps:[{title:'Problem Space',body:'Identified drone delivery as a near-future accessibility tool for people with mobility or chronic conditions.'},{title:'Interface Design',body:'Built intuitive destination-selection UI with real-time drone tracking and estimated arrival readout.'},{title:'Prototype',body:'Figma prototype validated drop-off point selection flow and confirmation UX across device sizes.'},{title:'Future Vision',body:'Anticipates 5G integration enabling remote rerouting and multi-drone fleet orchestration.'}],outcomes:['One-tap drop-off point selection on live map','Real-time drone tracking with ETA display','Confirmation flow reduces user error before dispatch','Designed for accessibility — minimal cognitive load']},
+      {name:'Wireless OBD Vehicle Interface',images:['images/projects/obd-1.jpg','images/projects/obd-2.jpg','images/projects/obd-3.jpg'],desc:"Proof-of-concept iOS app connecting wirelessly to a vehicle's OBD-2 and CAN bus via Bluetooth. Delivers real-time diagnostics — engine temp, battery health, fuel efficiency, fault codes.",tags:['iOS','Bluetooth','OBD-2','Diagnostics UI'],year:'Sept 2025',steps:[{title:'BT Connection',body:'Established Bluetooth pairing with OBD-2 module; handled connection state, pairing errors, and reconnect logic.'},{title:'CAN Bus Parsing',body:'Decoded real-time CAN bus packets into readable diagnostic values — RPM, temp, fuel, battery, fault codes.'},{title:'UI Design',body:'Glanceable metric cards, color-coded status indicators, and a single-tap diagnostics runner.'},{title:'5G Roadmap',body:'Anticipates 5G-enabled remote diagnostics from any location to vehicle onboard computer.'}],outcomes:['Wireless OBD-2 + CAN bus connection via Bluetooth','Live readout of engine temp, fuel, battery, tire health','Fault code listing with actionable clarity','Prototype validated on BMW 330e']},
+      {name:'Upcoming Research',images:[],desc:'A reserved node for an upcoming software or UX/UI exploration.',tags:['UX Research','In Progress','Exploration'],year:'Upcoming',steps:[{title:'Scoping',body:'Define the user problem, interface constraints, and expected experience outcome.'},{title:'Prototype',body:'Explore flows, interaction patterns, and technical implementation paths.'},{title:'Validation',body:'Evaluate usability, clarity, and system behavior with targeted feedback.'}],outcomes:['Placeholder for future software or UX/UI work','Balances the Software & UX/UI cluster visually','Ready to replace with full project details']},
+    ]},
+  { id:'res', label:'Research', color:'#7a5c38', hex:0x7a5c38, center:{t:2.08,p:1.55},
+    projects:[
+      {name:'Smart Shoe Motion Classification',images:['images/projects/smart-shoe-1.jpg','images/projects/smart-shoe-2.jpg','images/projects/smart-shoe-3.jpg'],desc:'Published IEEE Smart Cities 2021. Force sensor-equipped footwear classifying physical activities via ML classification trees — providing real-time pedestrian safety alerts to vehicles and smart city infrastructure.',tags:['ML','IoT','IEEE 2021','Wearables'],year:'IEEE Smart Cities 2021',steps:[{title:'Motivation',body:'Connected wearables can identify pedestrian activity and externally communicate safety alerts to vehicles.'},{title:'Sensor System',body:'Single-shoe and multi-sensor arrays capture motion: walk, run, jump, stand, soccer, bike.'},{title:'Classification',body:'Classification tree trained on data subsets; accuracy 40-54% improving with sensor arrays.'},{title:'Implications',body:'Real-time activity data enables smart city alerts, collision avoidance, and infrastructure planning.'}],outcomes:['Published IEEE Smart Cities Conference 2021','Classifies 7 activity types from force sensor data','Framework applicable to smart city collision avoidance','Groundwork for IoS (Internet of Shoes) platform']},
+      {name:'V2X Robot Swarm — Work Zone Safety',images:['images/projects/v2x-1.jpg','images/projects/v2x-2.jpg','images/projects/v2x-3.jpg'],desc:'Research on energy/compute-optimized configurations for dynamic robot swarms in road construction zones. Evaluated three compute architectures for peak battery performance.',tags:['V2X','Swarm Robotics','Battery Optimization','KSU'],year:'Kennesaw State University',steps:[{title:'Problem',body:'Mobile robot performance gains often come at detriment to battery life due to ML, vision, and wireless overhead.'},{title:'Architecture A',body:'Leader compute — one robot handles most tasks. Effective at high latency but creates bottleneck.'},{title:'Architecture B',body:'Distributed compute — robots share resources equally. Best when not burdened by vision tasks.'},{title:'Architecture C',body:'Remote compute via truck. Most optimal overall when latency is low — offloads heavy compute entirely.'}],outcomes:['Remote compute (Architecture C) optimal under low latency','Distributed compute best for non-vision tasks','Provides battery optimization methodology for swarms','Deployed on V2X-enabled robot platforms at KSU']},
+      {name:'Industry 4.0 Manufacturing Automation',images:['images/projects/industry40-1.jpg','images/projects/industry40-2.jpg','images/projects/industry40-3.jpg'],desc:'ASME IMECE 2022. Digital twin of an industrial pick-and-place system using Siemens PLM Tecnomatix, IIoT, and deep reinforcement learning.',tags:['Digital Twin','IIoT','ML','ASME 2022'],year:'ASME IMECE 2022',steps:[{title:'Digital Twin',body:'Created digital model of physical pick-and-place system in Siemens PLM Tecnomatix Process Simulate.'},{title:'IIoT Integration',body:'Connected IIoT data streams for real-time monitoring; explored cloud manufacturing and NGAS concepts.'},{title:'ML Layer',body:'Applied deep reinforcement learning to optimize pick-and-place sequence efficiency.'},{title:'Publication',body:'Published ASME 2022 IMECE Conference, Vol. 2B: Advanced Manufacturing, Columbus Ohio.'}],outcomes:['Published ASME IMECE 2022','Digital twin validated against physical system behavior','DRL improved pick-and-place cycle efficiency','Framework applicable to broader Industry 4.0 adoption']},
+    ]},
+];
+
+const GITHUB_URL = 'https://github.com/kalebkey';
+// Satellite images — drop your image files into images/satellites/ and update these paths
+const SAT_IMAGES = [
+  'images/satellites/sat-01.jpg',  // Satellite 01
+  'images/satellites/sat-02.jpg',  // Satellite 02
+  'images/satellites/sat-03.jpg',  // Satellite 03
+  'images/satellites/sat-04.jpg',  // Satellite 04
+  'images/satellites/sat-05.jpg',  // Satellite 05
+  'images/satellites/sat-06.jpg',  // Satellite 06
+  'images/satellites/sat-07.jpg',  // Satellite 07
+  'images/satellites/sat-08.jpg',  // Satellite 08
+  'images/satellites/sat-09.jpg',  // Satellite 09
+  'images/satellites/sat-10.jpg',  // Satellite 10
+  'images/satellites/sat-11.jpg',  // Satellite 11
+  'images/satellites/sat-12.jpg',  // Satellite 12
+  'images/satellites/sat-13.jpg',  // Satellite 13
+  'images/satellites/sat-14.jpg',  // Satellite 14
+];
+let currentSatIdx = 0;
+
+// Legend
+const legendEl = document.getElementById('legend');
+DISCS.forEach(d => {
+  const el = document.createElement('div'); el.className = 'leg-item';
+  el.dataset.disc = d.id;
+  el.innerHTML = `<div class="leg-dot" style="background:${d.color}"></div><span>${d.label}</span>`;
+  legendEl.appendChild(el);
+});
+
+// ── THREE ─────────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, powerPreference:'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0xc9b48a,1);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(52,1,0.1,100);
+camera.position.set(0,0,3.3);
+function resize(){
+  renderer.setSize(window.innerWidth,window.innerHeight);
+  camera.aspect=window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+}
+resize(); window.addEventListener('resize',resize);
+
+const R=1.0;
+function sph(t,p,r){ return new THREE.Vector3(r*Math.sin(t)*Math.cos(p),r*Math.cos(t),r*Math.sin(t)*Math.sin(p)); }
+
+// ── STARFIELD — four-pointed sparkle sprites ──────────────────────────────────
+function makeSparkleTexture() {
+  const c = document.createElement('canvas');
+  c.width = 64; c.height = 64;
+  const ctx = c.getContext('2d');
+  const cx = 32, cy = 32;
+  ctx.clearRect(0,0,64,64);
+  // Draw four-pointed star
+  ctx.fillStyle = 'rgba(54,69,117,1)';
+  ctx.beginPath();
+  const spikes = 4, outer = 28, inner = 5;
+  for (let i = 0; i < spikes * 2; i++) {
+    const angle = (i / (spikes * 2)) * Math.PI * 2 - Math.PI / 2;
+    const r2 = i % 2 === 0 ? outer : inner;
+    const x = cx + Math.cos(angle) * r2;
+    const y = cy + Math.sin(angle) * r2;
+    i === 0 ? ctx.moveTo(x,y) : ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  return new THREE.CanvasTexture(c);
+}
+const sparkTex = makeSparkleTexture();
+sparkTex.needsUpdate = true;
+
+// Static background stars — 3 layers, all within camera frustum (r 2.5-4.5)
+[
+  { count: 6000, size: 0.054, opacity: 0.65, rMin: 4.5, rMax: 6.0 },
+  { count: 3840, size: 0.042, opacity: 0.45, rMin: 5.5, rMax: 7.5 },
+  { count: 2400, size: 0.066, opacity: 0.30, rMin: 5.0, rMax: 7.0 },
+].forEach(layer => {
+  const verts = [];
+  for (let i = 0; i < layer.count; i++) {
+    const u = Math.random(), v = Math.random();
+    const theta = Math.acos(2*u-1), phi = 2*Math.PI*v;
+    const r = layer.rMin + Math.random()*(layer.rMax-layer.rMin);
+    verts.push(r*Math.sin(theta)*Math.cos(phi), r*Math.cos(theta), r*Math.sin(theta)*Math.sin(phi));
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(verts,3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({
+    color:0x364575, size:layer.size, map:sparkTex,
+    transparent:true, opacity:layer.opacity,
+    sizeAttenuation:true, depthWrite:false,
+    alphaTest: 0.01
+  })));
+});
+
+// Twinkling sparkle stars
+const sparkleMeshes = [];
+for (let i = 0; i < 1080; i++) {
+  const u = Math.random(), v = Math.random();
+  const theta = Math.acos(2*u-1), phi = 2*Math.PI*v;
+  const r = 4.5 + Math.random()*2.5;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute([0,0,0],3));
+  const mat = new THREE.PointsMaterial({
+    color:0x364575, size: 0.054 + Math.random()*0.024, map:sparkTex,
+    transparent:true, opacity:0.9, sizeAttenuation:true,
+    depthWrite:false, alphaTest:0.01
+  });
+  const pt = new THREE.Points(g, mat);
+  pt.position.set(r*Math.sin(theta)*Math.cos(phi), r*Math.cos(theta), r*Math.sin(theta)*Math.sin(phi));
+  scene.add(pt);
+  sparkleMeshes.push({ mesh:pt, phase:Math.random()*Math.PI*2, speed:1.5+Math.random()*4.0 });
+}
+
+
+const world = new THREE.Group(); scene.add(world);
+
+// Globe fill
+world.add(new THREE.Mesh(new THREE.SphereGeometry(R,64,40),new THREE.MeshBasicMaterial({color:0x3a4f28,transparent:true,opacity:0.24,depthWrite:false})));
+// Wireframe
+world.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(R,34,22)),new THREE.LineBasicMaterial({color:0x3a4f28,transparent:true,opacity:0.3})));
+
+// ── DOTS, ORGANIC CLUSTER FILLS + STIPPLE ────────────────────────────────────
+const dotObjs=[], allPos=[], allOwner=[];
+const continentVisuals = {};
+
+// Seeded-ish random for consistent stipple
+function seededRand(seed){ let x=Math.sin(seed)*10000; return x-Math.floor(x); }
+
+const CONTINENT_SHAPES = {
+  id:  { layout:1.02, jitter:0.82, axisU:1.30, axisV:0.74, rot:-0.28, spread:0.76, threshold:6.8, strength:0.38, anchor:0.25 },
+  rob: { layout:0.98, jitter:0.96, axisU:1.08, axisV:0.88, rot:0.16,  spread:0.72, threshold:7.05, strength:0.40, anchor:0.28 },
+  ux:  { layout:0.74, jitter:0.50, axisU:0.92, axisV:1.28, rot:-0.52, spread:0.58, threshold:5.9, strength:0.34, anchor:0.85 },
+  res: { layout:0.96, jitter:0.82, axisU:1.30, axisV:0.58, rot:0.28,  spread:0.70, threshold:6.7, strength:0.36, anchor:0.28 }
+};
+
+DISCS.forEach((disc,di) => {
+  const shape = CONTINENT_SHAPES[disc.id] || { layout:1, jitter:1, axisU:1, axisV:1, rot:0, spread:0.74, threshold:7.2, strength:0.40, anchor:0.35 };
+  const pts=[];
+  continentVisuals[disc.id]={fill:null,border:null,meta:null,core:null,lines:[],dots:[]};
+  disc.projects.forEach((proj,i) => {
+    const angle=(i/disc.projects.length)*Math.PI*2+di*1.1;
+    const ro=0.72*(0.45+(i%3)*0.32)*shape.layout;
+    const theta=Math.max(0.12,Math.min(Math.PI-0.12, disc.center.t+Math.sin(angle)*ro*0.55+(i*0.11%0.2-0.1)*shape.jitter));
+    const phi=disc.center.p+Math.cos(angle)*ro*0.85+(i*0.09%0.14-0.07)*shape.jitter;
+    const pos=sph(theta,phi,R);
+    const dotMesh=new THREE.Mesh(new THREE.SphereGeometry(0.026,10,10),new THREE.MeshBasicMaterial({color:disc.hex}));
+    dotMesh.position.copy(pos); world.add(dotMesh);
+    continentVisuals[disc.id].dots.push(dotMesh);
+    dotObjs.push({mesh:dotMesh,project:proj,discipline:disc,pos:pos.clone()});
+    pts.push(pos.clone()); allPos.push(pos.clone()); allOwner.push(di);
+  });
+
+  if(pts.length>=3){
+    // Centroid on sphere
+    const centroid=new THREE.Vector3(); pts.forEach(p=>centroid.add(p)); centroid.divideScalar(pts.length).normalize().multiplyScalar(R*0.997);
+    const normal=centroid.clone().normalize();
+    const up=Math.abs(normal.y)<0.9?new THREE.Vector3(0,1,0):new THREE.Vector3(1,0,0);
+    const tU=new THREE.Vector3().crossVectors(normal,up).normalize();
+    const tV=new THREE.Vector3().crossVectors(normal,tU).normalize();
+
+    // ── METABALL continent fill ───────────────────────────────────────────────
+    // Build an actual filled landmass from the same metaball field, then layer
+    // stipple points over it so the continents still feel alive and blobby.
+    const SAMPLES   = 2200;
+    const THRESHOLD = shape.threshold;
+    const STRENGTH  = shape.strength;
+    const SPREAD    = shape.spread;
+    const EDGE_STEPS = 96;
+    const cosR = Math.cos(shape.rot), sinR = Math.sin(shape.rot);
+    function shapeSpace(u,v){
+      return {
+        u:(u*cosR + v*sinR) / shape.axisU,
+        v:(-u*sinR + v*cosR) / shape.axisV
+      };
+    }
+    function fromShapeSpace(u,v){
+      const su = u * shape.axisU, sv = v * shape.axisV;
+      return {
+        u:su*cosR - sv*sinR,
+        v:su*sinR + sv*cosR
+      };
+    }
+
+    const localDots = pts.map(p => {
+      const d = p.clone().sub(centroid);
+      const shaped = shapeSpace(d.dot(tU), d.dot(tV));
+      return { u:shaped.u, v:shaped.v, weight:1 };
+    });
+    localDots.push({ u:0, v:0, weight:shape.anchor });
+    function fieldAt(u,v){
+      const shaped = shapeSpace(u, v);
+      let field = 0;
+      localDots.forEach(dot => {
+        const du = shaped.u - dot.u, dv = shaped.v - dot.v;
+        field += (STRENGTH * dot.weight) / Math.max(du*du + dv*dv, 0.0035);
+      });
+      return field;
+    }
+    function projectLocal(u,v,r=R*1.002){
+      return centroid.clone()
+        .add(tU.clone().multiplyScalar(u))
+        .add(tV.clone().multiplyScalar(v))
+        .normalize()
+        .multiplyScalar(r);
+    }
+
+    const edgePts = [];
+    for(let e=0;e<EDGE_STEPS;e++){
+      const a = (e / EDGE_STEPS) * Math.PI * 2;
+      const ca = Math.cos(a), sa = Math.sin(a);
+      let lo = 0.02, hi = SPREAD;
+      for(let it=0;it<12;it++){
+        const mid = (lo + hi) * 0.5;
+        const shaped = fromShapeSpace(ca*mid, sa*mid);
+        if(fieldAt(shaped.u, shaped.v) > THRESHOLD) lo = mid;
+        else hi = mid;
+      }
+      const wobble = 1 + (seededRand(di*9000 + e*19) - 0.5) * 0.12;
+      const edge = fromShapeSpace(ca*lo*wobble, sa*lo*wobble);
+      edgePts.push(projectLocal(edge.u, edge.v));
+    }
+
+    const fillVerts = [];
+    for(let e=0;e<edgePts.length;e++){
+      const a = edgePts[e], b = edgePts[(e+1)%edgePts.length];
+      fillVerts.push(centroid.x,centroid.y,centroid.z, a.x,a.y,a.z, b.x,b.y,b.z);
+    }
+    const fillGeo = new THREE.BufferGeometry();
+    fillGeo.setAttribute('position', new THREE.Float32BufferAttribute(fillVerts, 3));
+    const fillMesh = new THREE.Mesh(fillGeo, new THREE.MeshBasicMaterial({
+      color:disc.hex, transparent:true, opacity:0.23, side:THREE.DoubleSide, depthWrite:false
+    }));
+    world.add(fillMesh);
+    continentVisuals[disc.id].fill=fillMesh;
+    const borderLoop = new THREE.LineLoop(
+      new THREE.BufferGeometry().setFromPoints(edgePts),
+      new THREE.LineBasicMaterial({color:disc.hex,transparent:true,opacity:0.28})
+    );
+    world.add(borderLoop);
+    continentVisuals[disc.id].border=borderLoop;
+
+    const metaVerts = [];
+    const metaSizes = [];
+
+    for (let s = 0; s < SAMPLES; s++) {
+      // Stratified random sample on tangent plane, projected to sphere
+      const u = (seededRand(di * 1000 + s * 7) - 0.5) * SPREAD * 2;
+      const v = (seededRand(di * 2000 + s * 13) - 0.5) * SPREAD * 2;
+      const candidate = centroid.clone()
+        .add(tU.clone().multiplyScalar(u))
+        .add(tV.clone().multiplyScalar(v));
+      candidate.normalize().multiplyScalar(R * 0.999);
+
+      const field = fieldAt(u, v);
+
+      if (field > THRESHOLD) {
+        // Vary opacity and size by field strength for depth
+        const intensity = Math.min((field - THRESHOLD) / 8, 1);
+        metaVerts.push(candidate.x, candidate.y, candidate.z);
+        metaSizes.push(intensity);
+      }
+    }
+
+    if (metaVerts.length > 0) {
+      const metaGeo = new THREE.BufferGeometry();
+      metaGeo.setAttribute('position', new THREE.Float32BufferAttribute(metaVerts, 3));
+      const metaPoints = new THREE.Points(metaGeo, new THREE.PointsMaterial({
+        color: disc.hex,
+        size: 0.018,
+        transparent: true,
+        opacity: 0.55,
+        sizeAttenuation: true,
+        depthWrite: false
+      }));
+      world.add(metaPoints);
+      continentVisuals[disc.id].meta=metaPoints;
+
+      // Second denser pass for the core — higher threshold = bright centre
+      const coreVerts = [];
+      for (let i = 0; i < metaVerts.length; i += 3) {
+        if (metaSizes[i/3] > 0.55) {
+          coreVerts.push(metaVerts[i], metaVerts[i+1], metaVerts[i+2]);
+        }
+      }
+      if (coreVerts.length > 0) {
+        const coreGeo = new THREE.BufferGeometry();
+        coreGeo.setAttribute('position', new THREE.Float32BufferAttribute(coreVerts, 3));
+        const corePoints = new THREE.Points(coreGeo, new THREE.PointsMaterial({
+          color: disc.hex,
+          size: 0.026,
+          transparent: true,
+          opacity: 0.75,
+          sizeAttenuation: true,
+          depthWrite: false
+        }));
+        world.add(corePoints);
+        continentVisuals[disc.id].core=corePoints;
+      }
+    }
+  }
+
+  // Intra-cluster lines
+  for(let a=0;a<pts.length;a++) for(let b=a+1;b<pts.length;b++){
+    const d=pts[a].distanceTo(pts[b]);
+    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([pts[a],pts[b]]),new THREE.LineBasicMaterial({color:disc.hex,transparent:true,opacity:d<0.55?0.85:d<0.85?0.5:0.25}));
+    line.userData.baseOpacity=line.material.opacity;
+    world.add(line);
+    continentVisuals[disc.id].lines.push(line);
+  }
+});
+
+// Cross-cluster mesh
+for(let a=0;a<allPos.length;a++) for(let b=a+1;b<allPos.length;b++){
+  if(allOwner[a]===allOwner[b]) continue;
+  const d=allPos[a].distanceTo(allPos[b]);
+  if(d>1.3) continue;
+  world.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([allPos[a],allPos[b]]),new THREE.LineBasicMaterial({color:0x3a4f28,transparent:true,opacity:Math.max(0.04,0.2-d*0.14)})));
+}
+
+function setContinentHighlight(id,on){
+  const v=continentVisuals[id];
+  if(!v)return;
+  if(v.fill)v.fill.material.opacity=on?0.48:0.23;
+  if(v.border)v.border.material.opacity=on?0.86:0.28;
+  if(v.meta){v.meta.material.opacity=on?0.92:0.55;v.meta.material.size=on?0.026:0.018;}
+  if(v.core){v.core.material.opacity=on?1.0:0.75;v.core.material.size=on?0.035:0.026;}
+  v.lines.forEach(line=>{line.material.opacity=on?Math.min(1,line.userData.baseOpacity+0.22):line.userData.baseOpacity;});
+  v.dots.forEach(dot=>dot.userData.legendBoost=on);
+}
+document.querySelectorAll('.leg-item').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{el.classList.add('active');setContinentHighlight(el.dataset.disc,true);});
+  el.addEventListener('mouseleave',()=>{el.classList.remove('active');setContinentHighlight(el.dataset.disc,false);});
+});
+
+const satRing=new THREE.Group(); scene.add(satRing);
+satRing.rotation.z=0.55; satRing.rotation.x=0.2;
+const SAT_N=14, SAT_R=1.38;
+const satObjs=[];
+for(let i=0;i<SAT_N;i++){
+  const angle=(i/SAT_N)*Math.PI*2;
+  const grp=new THREE.Group();
+  const satBody=new THREE.Mesh(new THREE.BoxGeometry(0.028,0.012,0.012),new THREE.MeshBasicMaterial({color:0xc4a870}));
+  grp.add(satBody);
+  const pMat=new THREE.MeshBasicMaterial({color:0x6b1a1a,transparent:true,opacity:0.9});
+  const pGeo=new THREE.BoxGeometry(0.032,0.002,0.016);
+  const pL=new THREE.Mesh(pGeo,pMat); pL.position.set(-0.03,0,0); grp.add(pL);
+  const pR=new THREE.Mesh(pGeo,pMat); pR.position.set(0.03,0,0); grp.add(pR);
+  grp.position.set(SAT_R*Math.cos(angle),0,SAT_R*Math.sin(angle));
+  grp.rotation.y=-angle+Math.PI/2;
+  satRing.add(grp);
+  satObjs.push({grp, satBody, idx:i});
+}
+let satFlow=0;
+let satPaused=false;
+// Orbit path
+const oc=new THREE.EllipseCurve(0,0,SAT_R,SAT_R,0,Math.PI*2,false,0);
+const oPts=oc.getPoints(120);
+const oGeo=new THREE.BufferGeometry().setFromPoints(oPts.map(p=>new THREE.Vector3(p.x,0,p.y)));
+satRing.add(new THREE.Line(oGeo,new THREE.LineBasicMaterial({color:0x7a6040,transparent:true,opacity:0.18})));
+
+// ── SUN — Three.js mesh, fixed top-right, like planet/moon style ─────────────
+const sunGroup = new THREE.Group();
+scene.add(sunGroup);
+
+// Sun core sphere
+const sunCore = new THREE.Mesh(
+  new THREE.SphereGeometry(0.133, 64, 48),
+  new THREE.MeshBasicMaterial({ color:0xe8c14a, transparent:true, opacity:0.74 })
+);
+sunGroup.add(sunCore);
+
+// Wireframe overlay like the globe/moon
+sunGroup.add(new THREE.LineSegments(
+  new THREE.WireframeGeometry(new THREE.SphereGeometry(0.133, 24, 18)),
+  new THREE.LineBasicMaterial({ color:0xc8960a, transparent:true, opacity:0.28 })
+));
+
+// Outer glow shell
+sunGroup.add(new THREE.Mesh(
+  new THREE.SphereGeometry(0.154, 24, 16),
+  new THREE.MeshBasicMaterial({ color:0xf0d060, transparent:true, opacity:0.064, side:THREE.BackSide, depthWrite:false })
+));
+sunGroup.add(new THREE.Mesh(
+  new THREE.SphereGeometry(0.182, 24, 16),
+  new THREE.MeshBasicMaterial({ color:0xf0c030, transparent:true, opacity:0.032, side:THREE.BackSide, depthWrite:false })
+));
+
+// Light rays — thin lines radiating outward from sun surface
+const RAY_DEFS = [
+  {theta:0.3, phi:0.5, len:0.55}, {theta:0.8, phi:1.2, len:0.70},
+  {theta:1.2, phi:2.1, len:0.45}, {theta:0.5, phi:3.0, len:0.80},
+  {theta:1.5, phi:3.8, len:0.60}, {theta:0.2, phi:4.5, len:0.50},
+  {theta:1.0, phi:5.2, len:0.75}, {theta:0.7, phi:0.1, len:0.55},
+  {theta:1.3, phi:1.7, len:0.65}, {theta:0.4, phi:2.6, len:0.48},
+  {theta:1.7, phi:4.2, len:0.70}, {theta:0.6, phi:5.8, len:0.42},
+  {theta:0.9, phi:0.8, len:0.58}, {theta:1.1, phi:3.3, len:0.68},
+  {theta:0.3, phi:2.0, len:0.52}, {theta:1.6, phi:1.0, len:0.62},
+];
+const sunRayGroup = new THREE.Group();
+sunGroup.add(sunRayGroup);
+RAY_DEFS.forEach(({theta, phi, len}) => {
+  const dir = new THREE.Vector3(
+    Math.sin(theta)*Math.cos(phi),
+    Math.cos(theta),
+    Math.sin(theta)*Math.sin(phi)
+  ).normalize();
+  const start = dir.clone().multiplyScalar(0.14);
+  const end   = dir.clone().multiplyScalar(0.14 + len * 0.5);
+  const geo = new THREE.BufferGeometry().setFromPoints([start, end]);
+  sunRayGroup.add(new THREE.Line(geo, new THREE.LineBasicMaterial({
+    color: 0xf0d060, transparent:true,
+    opacity: 0.18 + Math.random() * 0.22
+  })));
+});
+
+// Position sun fixed in top-right — convert screen corner to world space
+// Place it partially off screen at top-right, not rotating with world
+function positionSun() {
+  // Unproject top-right screen corner into world space at a fixed depth
+  const aspect = window.innerWidth / window.innerHeight;
+  // At camera z=3.3, fov=52, top-right corner in view space:
+  const fovRad = 52 * Math.PI / 180;
+  const halfH = Math.tan(fovRad/2) * 1.8; // depth ~1.8 units from camera
+  const halfW = halfH * aspect;
+  sunGroup.position.set(halfW * 0.85, halfH * 0.82, camera.position.z - 1.8);
+}
+positionSun();
+window.addEventListener('resize', positionSun);
+
+// Slow sun self-rotation
+let sunRot = 0;
+
+// Moon
+const moon=new THREE.Mesh(new THREE.SphereGeometry(0.065,16,16),new THREE.MeshBasicMaterial({color:0xd4c89a}));
+moon.add(new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.SphereGeometry(0.068,8,6)),new THREE.LineBasicMaterial({color:0x3a4f28,transparent:true,opacity:0.6})));
+scene.add(moon);
+
+const moonTrailGeo=new THREE.BufferGeometry().setFromPoints(
+  Array.from({length:86},(_,i)=>{
+    const a=(i/85)*Math.PI*2;
+    return new THREE.Vector3(Math.cos(a)*1.62,Math.sin(a*0.42)*0.736+0.493,Math.sin(a)*1.0);
+  })
+);
+const moonTrail=new THREE.Line(moonTrailGeo,new THREE.LineBasicMaterial({color:0xd4c89a,transparent:true,opacity:0.12,depthWrite:false}));
+scene.add(moonTrail);
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let rotY=0.16,tiltX=0.16,autoRotate=true,isDragging=false;
+let prevMx={x:0,y:0},dragD={x:0,y:0},moonAngle=0.8;
+let moonPaused=false;
+const raycaster=new THREE.Raycaster();
+const mouse=new THREE.Vector2(-99,-99);
+let hovDot=null,hovMoon=false,hovSat=null;
+const cameraHomeZ=3.3;
+let entryState=null;
+const dotMeshes=dotObjs.map(d=>d.mesh);
+const satBodyMeshes=satObjs.map(s=>s.satBody);
+const screenVec=new THREE.Vector3();
+const worldVec=new THREE.Vector3();
+let focusedDotIndex=0;
+const ui={
+  tooltip:document.getElementById('tooltip'),
+  ttCat:document.getElementById('tt-cat'),
+  ttName:document.getElementById('tt-name'),
+  moonLabel:document.getElementById('moon-label'),
+  reticle:document.getElementById('focus-reticle'),
+  dockStatus:document.getElementById('dock-status'),
+  projPrev:document.getElementById('proj-prev'),
+  projNext:document.getElementById('proj-next'),
+  dockPrev:document.getElementById('dock-prev'),
+  dockNext:document.getElementById('dock-next'),
+  dockPause:document.getElementById('dock-pause'),
+  dockSimple:document.getElementById('dock-simple'),
+  moonPause:document.getElementById('gh-hint'),
+  satPause:document.getElementById('sat-hint'),
+  splash:document.getElementById('splash'),
+  simpleView:document.getElementById('simple-view'),
+  simpleSections:document.getElementById('simple-sections'),
+  enterGlobe:document.getElementById('enter-globe'),
+  enterSimple:document.getElementById('enter-simple'),
+  simpleBack:document.getElementById('simple-back')
+};
+
+function showGlobe(){
+  ui.splash.classList.add('hidden');
+  ui.simpleView.classList.add('hidden');
+}
+function showSimple(){
+  ui.splash.classList.add('hidden');
+  ui.simpleView.classList.remove('hidden');
+}
+function buildSimpleView(){
+  ui.simpleSections.innerHTML='';
+  DISCS.forEach(disc=>{
+    const section=document.createElement('section');
+    section.className='simple-section';
+    section.innerHTML=`<h3 style="color:${disc.color}">${disc.label}</h3>`;
+    disc.projects.forEach(project=>{
+      const dot=dotObjs.find(d=>d.project===project);
+      const btn=document.createElement('button');
+      btn.className='simple-project';
+      btn.innerHTML=`<div class="simple-project-name">${project.name}</div><div class="simple-project-meta">${project.year} · ${project.tags.slice(0,3).join(' / ')}</div>`;
+      btn.addEventListener('click',()=>{
+        ui.simpleView.classList.add('hidden');
+        focusedDotIndex=getDotIndex(dot);
+        openProjModal(project,disc);
+      });
+      section.appendChild(btn);
+    });
+    ui.simpleSections.appendChild(section);
+  });
+}
+buildSimpleView();
+
+function nearestVisibleDot(clientX,clientY,maxPx=24){
+  let best=null, bestD=maxPx;
+  dotObjs.forEach(d=>{
+    worldVec.copy(d.pos).applyMatrix4(world.matrixWorld);
+    screenVec.copy(worldVec).project(camera);
+    if(screenVec.z<-1||screenVec.z>1)return;
+    const sx=(screenVec.x*0.5+0.5)*window.innerWidth;
+    const sy=(-screenVec.y*0.5+0.5)*window.innerHeight;
+    const dist=Math.hypot(sx-clientX,sy-clientY);
+    if(dist<bestD){best=d;bestD=dist;}
+  });
+  return best;
+}
+function getDotIndex(dot){return Math.max(0,dotObjs.findIndex(d=>d===dot));}
+function focusDotByIndex(index,enter=false){
+  focusedDotIndex=(index+dotObjs.length)%dotObjs.length;
+  const dot=dotObjs[focusedDotIndex];
+  if(enter)startProjectEntry(dot);
+  else{
+    hovDot=dot;
+    updateProjectHover(dot);
+  }
+}
+function updateProjectHover(dot){
+  if(!dot)return;
+  ui.ttCat.textContent=dot.discipline.label;
+  ui.ttCat.style.color=dot.discipline.color;
+  ui.ttName.textContent=dot.project.name;
+  ui.tooltip.classList.add('visible');
+  ui.dockStatus.textContent=dot.discipline.label.split(' ')[0];
+  document.body.classList.add('hovering');
+  const wp=worldVec.copy(dot.pos).applyMatrix4(world.matrixWorld);
+  const sp=screenVec.copy(wp).project(camera);
+  ui.reticle.style.left=(sp.x*0.5+0.5)*window.innerWidth+'px';
+  ui.reticle.style.top=(-sp.y*0.5+0.5)*window.innerHeight+'px';
+  ui.reticle.classList.add('visible');
+}
+
+// ── INFO PANEL ────────────────────────────────────────────────────────────────
+const infoPanel=document.getElementById('info-panel');
+document.getElementById('info-trigger').addEventListener('click',e=>{e.stopPropagation();infoPanel.classList.toggle('open');});
+document.getElementById('info-close').addEventListener('click',()=>infoPanel.classList.remove('open'));
+document.addEventListener('click',e=>{if(!infoPanel.contains(e.target)&&e.target!==document.getElementById('info-trigger'))infoPanel.classList.remove('open');});
+
+// ── PROJECT MODAL ─────────────────────────────────────────────────────────────
+const projOverlay=document.getElementById('proj-overlay');
+const projCard=document.getElementById('proj-card');
+const projExpanded=document.getElementById('proj-expanded');
+let curProj=null,curDisc=null;
+
+document.getElementById('proj-close').addEventListener('click',closeProjModal);
+document.getElementById('btn-expand').addEventListener('click',showExpanded);
+document.getElementById('btn-back').addEventListener('click',showCard);
+ui.projPrev.addEventListener('click',()=>navigateProject(-1));
+ui.projNext.addEventListener('click',()=>navigateProject(1));
+ui.dockPrev.addEventListener('click',()=>focusDotByIndex(focusedDotIndex-1,true));
+ui.dockNext.addEventListener('click',()=>focusDotByIndex(focusedDotIndex+1,true));
+ui.dockPause.addEventListener('click',()=>{
+  autoRotate=!autoRotate;
+  ui.dockPause.textContent=autoRotate?'Ⅱ':'▶';
+  ui.dockStatus.textContent=autoRotate?'orbiting':'paused';
+});
+ui.dockSimple.addEventListener('click',showSimple);
+ui.moonPause.addEventListener('click',()=>{
+  moonPaused=!moonPaused;
+  ui.moonPause.textContent=moonPaused?'moon orbit: resume':'moon orbit: pause';
+  ui.moonPause.title=moonPaused?'Resume moon orbit':'Pause moon orbit';
+});
+ui.satPause.addEventListener('click',()=>{
+  satPaused=!satPaused;
+  ui.satPause.textContent=satPaused?'sat orbit: resume':'sat orbit: pause';
+  ui.satPause.title=satPaused?'Resume satellite orbit':'Pause satellite orbit';
+});
+ui.enterGlobe.addEventListener('click',showGlobe);
+ui.enterSimple.addEventListener('click',showSimple);
+ui.simpleBack.addEventListener('click',showGlobe);
+projOverlay.addEventListener('click',e=>{if(e.target===projOverlay)closeProjModal();});
+
+function showCard(){projExpanded.classList.remove('visible');projCard.classList.remove('hidden');}
+function renderTags(tags){return tags.map(t=>`<span class="tag">${t}</span>`).join('');}
+function setProjectModalContent(proj,disc){
+  curProj=proj; curDisc=disc;
+  document.getElementById('pc-cat').textContent=disc.label;
+  document.getElementById('pc-cat').style.color=disc.color;
+  document.getElementById('pc-title').textContent=proj.name;
+  document.getElementById('pc-desc').textContent=proj.desc;
+  document.getElementById('pc-tags').innerHTML=renderTags(proj.tags);
+  document.getElementById('pc-year').textContent=proj.year;
+}
+function navigateProject(dir){
+  const base=curProj?dotObjs.findIndex(d=>d.project===curProj):focusedDotIndex;
+  const next=dotObjs[(base+dir+dotObjs.length)%dotObjs.length];
+  focusedDotIndex=getDotIndex(next);
+  setProjectModalContent(next.project,next.discipline);
+  if(projExpanded.classList.contains('visible')){
+    curProj=next.project; curDisc=next.discipline;
+    showExpanded();
+  }
+}
+function showExpanded(){
+  if(!curProj)return;
+  projCard.classList.add('hidden'); projExpanded.classList.add('visible');
+  document.getElementById('pe-cat').textContent=curDisc.label; document.getElementById('pe-cat').style.color=curDisc.color;
+  document.getElementById('pe-title').textContent=curProj.name;
+  document.getElementById('pe-tags').innerHTML=renderTags(curProj.tags);
+  document.getElementById('pe-year').textContent=curProj.year;
+  const gal=document.getElementById('pe-gallery'); gal.innerHTML='';
+  (curProj.images||[]).forEach((src,i)=>{
+    const sl=document.createElement('div'); sl.className='gslot';
+    if(src){ sl.innerHTML=`<img src="${src}" alt="${curProj.name} image ${i+1}">`; }
+    else { sl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Image coming soon</span>`; }
+    gal.appendChild(sl);
+  });
+  if(!curProj.images||curProj.images.length===0){
+    const sl=document.createElement('div'); sl.className='gslot';
+    sl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Images coming soon</span>`;
+    gal.appendChild(sl);
+  }
+  const sg2=document.getElementById('pe-steps'); sg2.innerHTML='';
+  (curProj.steps||[]).forEach((s,i)=>{const el=document.createElement('div');el.className='step-card';el.innerHTML=`<div class="step-num">0${i+1}</div><div class="step-title">${s.title}</div><div class="step-body">${s.body}</div>`;sg2.appendChild(el);});
+  const ol=document.getElementById('pe-outcomes'); ol.innerHTML='';
+  (curProj.outcomes||[]).forEach(o=>{const el=document.createElement('div');el.className='out-item';el.innerHTML=`<div class="out-dot"></div><span>${o}</span>`;ol.appendChild(el);});
+}
+function openProjModal(proj,disc){
+  setProjectModalContent(proj,disc);
+  ui.tooltip.classList.remove('visible');
+  ui.reticle.classList.remove('visible');
+  projCard.classList.remove('hidden'); projExpanded.classList.remove('visible');
+  projOverlay.classList.add('open'); autoRotate=false;
+}
+function startProjectEntry(dot){
+  if(entryState || projOverlay.classList.contains('open'))return;
+  autoRotate=false;
+  hovDot=null;
+  focusedDotIndex=getDotIndex(dot);
+  ui.tooltip.classList.remove('visible');
+  ui.reticle.classList.add('visible');
+  document.body.classList.add('entering-project');
+
+  const p=dot.pos.clone().normalize();
+  entryState={
+    started:clock.getElapsedTime(),
+    duration:0.68,
+    opened:false,
+    dot,
+    fromRotY:rotY,
+    fromTiltX:tiltX,
+    toRotY:Math.atan2(p.x,p.z),
+    toTiltX:Math.max(-0.48,Math.min(0.48,-Math.asin(p.y)*0.72)),
+    fromCamZ:camera.position.z,
+    toCamZ:2.48
+  };
+}
+function closeProjModal(){
+  projOverlay.classList.remove('open');
+  document.body.classList.remove('entering-project');
+  entryState=null;
+  setTimeout(()=>{
+    camera.position.z=cameraHomeZ;
+    autoRotate=true;
+    projCard.classList.remove('hidden');
+    projExpanded.classList.remove('visible');
+  },400);
+}
+function loadImg(input){const sl=input.parentElement;if(input.files&&input.files[0]){const img=document.createElement('img');img.src=URL.createObjectURL(input.files[0]);sl.innerHTML='';sl.appendChild(img);}}
+
+// ── SATELLITE MODAL ───────────────────────────────────────────────────────────
+const satOverlay=document.getElementById('sat-overlay');
+document.getElementById('sat-close').addEventListener('click',closeSatModal);
+satOverlay.addEventListener('click',e=>{if(e.target===satOverlay)closeSatModal();});
+function openSatModal(idx){
+  currentSatIdx=idx;
+  document.getElementById('sat-lbl-el').textContent=`Satellite ${String(idx+1).padStart(2,'0')}`;
+  const slot=document.getElementById('sat-img-slot');
+  const src=SAT_IMAGES[idx];
+  if(src){
+    slot.innerHTML=`<img src="${src}" alt="Satellite ${idx+1}">`;
+  } else {
+    slot.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Image coming soon</span>`;
+  }
+  satOverlay.classList.add('open'); autoRotate=false;
+}
+function closeSatModal(){satOverlay.classList.remove('open');setTimeout(()=>{autoRotate=true;},400);}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&!ui.splash.classList.contains('hidden')){showGlobe();return;}
+  if(e.key==='Escape'&&!ui.simpleView.classList.contains('hidden')){showGlobe();return;}
+  if(e.key==='Escape'){closeProjModal();closeSatModal();}
+  if(e.key==='ArrowLeft'){projOverlay.classList.contains('open')?navigateProject(-1):focusDotByIndex(focusedDotIndex-1,false);}
+  if(e.key==='ArrowRight'){projOverlay.classList.contains('open')?navigateProject(1):focusDotByIndex(focusedDotIndex+1,false);}
+  if(e.key==='Enter'&&hovDot&&!projOverlay.classList.contains('open'))startProjectEntry(hovDot);
+  if(e.key===' '&&e.target===document.body){e.preventDefault();autoRotate=!autoRotate;ui.dockPause.textContent=autoRotate?'Ⅱ':'▶';ui.dockStatus.textContent=autoRotate?'orbiting':'paused';}
+});
+
+// ── INPUT ─────────────────────────────────────────────────────────────────────
+canvas.addEventListener('mousemove',e=>{
+  mouse.x=(e.clientX/window.innerWidth)*2-1;
+  mouse.y=-(e.clientY/window.innerHeight)*2+1;
+  if(isDragging){const dx=e.clientX-prevMx.x,dy=e.clientY-prevMx.y;rotY+=dx*0.005;tiltX=Math.max(-0.55,Math.min(0.55,tiltX+dy*0.004));dragD={x:dx,y:dy};prevMx={x:e.clientX,y:e.clientY};}
+  ui.tooltip.style.left=e.clientX+'px'; ui.tooltip.style.top=e.clientY+'px';
+  ui.moonLabel.style.left=e.clientX+'px'; ui.moonLabel.style.top=e.clientY+'px';
+});
+canvas.addEventListener('mousedown',e=>{isDragging=true;autoRotate=false;prevMx={x:e.clientX,y:e.clientY};dragD={x:0,y:0};});
+canvas.addEventListener('mouseup',()=>{isDragging=false;setTimeout(()=>{if(!projOverlay.classList.contains('open')&&!satOverlay.classList.contains('open'))autoRotate=true;},1400);});
+canvas.addEventListener('click',e=>{
+  if(Math.abs(dragD.x)>5||Math.abs(dragD.y)>5){dragD={x:0,y:0};return;}
+  dragD={x:0,y:0};
+  if(hovMoon){window.open(GITHUB_URL,'_blank');return;}
+  if(hovSat){openSatModal(hovSat.idx);return;}
+  const clickedDot=hovDot||nearestVisibleDot(e.clientX,e.clientY);
+  if(clickedDot){startProjectEntry(clickedDot);}
+});
+
+// ── RENDER LOOP ───────────────────────────────────────────────────────────────
+const clock=new THREE.Clock();
+function animate(){
+  requestAnimationFrame(animate);
+  const t=clock.getElapsedTime();
+  if(autoRotate)rotY+=0.0013;
+  if(entryState){
+    const k=Math.min((t-entryState.started)/entryState.duration,1);
+    const ease=1-Math.pow(1-k,3);
+    rotY=entryState.fromRotY+(entryState.toRotY-entryState.fromRotY)*ease;
+    tiltX=entryState.fromTiltX+(entryState.toTiltX-entryState.fromTiltX)*ease;
+    camera.position.z=entryState.fromCamZ+(entryState.toCamZ-entryState.fromCamZ)*ease;
+    updateProjectHover(entryState.dot);
+    if(k>0.78&&!entryState.opened){
+      entryState.opened=true;
+      openProjModal(entryState.dot.project,entryState.dot.discipline);
+    }
+  }else if(!projOverlay.classList.contains('open')&&!satOverlay.classList.contains('open')){
+    camera.position.z+=(cameraHomeZ-camera.position.z)*0.08;
+  }
+  world.rotation.set(tiltX,rotY,0);
+
+  const st = clock.getElapsedTime();
+  sparkleMeshes.forEach(s => {
+    // Aggressive twinkle — full 0 to 1 opacity swing, fast speeds
+    const pulse = 0.5 + 0.5 * Math.sin(st * s.speed + s.phase);
+    const pulse2 = 0.5 + 0.5 * Math.sin(st * s.speed * 2.1 + s.phase + 1.2);
+    s.mesh.material.opacity = pulse * pulse2; // multiplied = sharper peaks, darker troughs
+    s.mesh.material.size = 0.036 + 0.048 * pulse;
+  });
+
+  // Sun slow rotation + ray pulse
+  sunRot += 0.0018;
+  sunCore.rotation.y = sunRot;
+  sunRayGroup.rotation.y = sunRot * 0.4;
+  sunRayGroup.rotation.z = sunRot * 0.25;
+
+  if(!satPaused){
+    satFlow += 0.0026;
+    satRing.rotation.y += 0.0022;
+    satRing.rotation.z = 0.55 + Math.sin(t*0.42)*0.045;
+    satObjs.forEach(s=>{
+      const a=(s.idx/SAT_N)*Math.PI*2+satFlow;
+      s.grp.position.y=Math.sin(a*1.7)*0.018;
+      s.grp.rotation.z=Math.sin(a*1.3)*0.18;
+    });
+  }
+  if(!moonPaused)moonAngle += 0.0021375 + (hovMoon?0.0012:0);
+  moon.position.set(Math.cos(moonAngle)*1.62,Math.sin(moonAngle*0.42)*0.736+0.493,Math.sin(moonAngle)*1.0);
+  if(!moonPaused)moon.rotation.y+=0.00675;
+
+  raycaster.setFromCamera(mouse,camera);
+
+  // Moon
+  hovMoon=raycaster.intersectObject(moon).length>0;
+  hovMoon?ui.moonLabel.classList.add('visible'):ui.moonLabel.classList.remove('visible');
+  const moonPulse=0.5+0.5*Math.sin(t*3.2);
+  moonTrail.material.opacity+=( (hovMoon?0.26:0.12+moonPulse*0.025) - moonTrail.material.opacity )*0.08;
+
+  // Satellites
+  const satHits=raycaster.intersectObjects(satBodyMeshes);
+  hovSat=satHits.length>0?satObjs.find(s=>s.satBody===satHits[0].object):null;
+  satObjs.forEach(s=>s.grp.scale.setScalar(hovSat&&s.satBody===hovSat.satBody?1.6:1.0));
+
+  // Dots
+  const dotHits=raycaster.intersectObjects(dotMeshes);
+  if(!hovMoon&&!hovSat&&!entryState&&!projOverlay.classList.contains('open')){
+    if(dotHits.length>0){
+      const dd=dotObjs.find(d=>d.mesh===dotHits[0].object);
+      if(dd){hovDot=dd;focusedDotIndex=getDotIndex(dd);updateProjectHover(dd);}
+    }else{hovDot=null;ui.tooltip.classList.remove('visible');ui.reticle.classList.remove('visible');ui.dockStatus.textContent=autoRotate?'orbiting':'paused';if(!hovSat)document.body.classList.remove('hovering');}
+  }
+  if(hovMoon||hovSat)document.body.classList.add('hovering');
+  else if(!hovDot)document.body.classList.remove('hovering');
+
+  dotObjs.forEach((d,i)=>{const selected=entryState&&entryState.dot.mesh===d.mesh;const s=selected?2.85:(hovDot&&d.mesh===hovDot.mesh)?2.2:d.mesh.userData.legendBoost?1.85:(1+0.18*Math.sin(t*1.5+i*0.85));d.mesh.scale.setScalar(s);});
+  moon.scale.setScalar((hovMoon?1.22:1)+0.06*Math.sin(t*2.0));
+  renderer.render(scene,camera);
+}
+animate();
+</script>
+</body>
 </html>
