@@ -141,6 +141,11 @@ body.entering-project canvas{filter:blur(4px) brightness(0.68) saturate(0.82);op
 .exp-gallery{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:32px;}
 .gslot{aspect-ratio:4/3;border-radius:12px;border:1.5px dashed var(--forest-dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(58,79,40,0.05);color:var(--ink-dim);font-family:'DM Mono',monospace;font-size:11px;text-align:center;padding:16px;cursor:pointer;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
 .gslot:hover{background:rgba(58,79,40,0.1);border-color:var(--forest);}
+.gslot.has-image{border-style:solid;}
+.gslot.has-image::after{content:"";position:absolute;inset:0;border-radius:11px;box-shadow:inset 0 0 0 0 rgba(242,234,216,0),inset 0 0 0 0 rgba(58,79,40,0);transition:box-shadow 0.2s,background 0.2s;pointer-events:none;}
+.gslot.has-image:hover::after{background:rgba(30,40,16,0.08);box-shadow:inset 0 0 0 2px rgba(242,234,216,0.8),inset 0 0 0 4px rgba(58,79,40,0.8);}
+.gslot.has-image.selected{border-color:var(--forest);box-shadow:0 0 0 3px rgba(58,79,40,0.22),0 16px 34px rgba(30,40,16,0.18);}
+.gslot.has-image.selected::after{box-shadow:inset 0 0 0 2px var(--cream),inset 0 0 0 5px var(--forest);}
 .gslot svg{width:28px;height:28px;opacity:0.4;}
 .gslot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:11px;}
 .gslot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
@@ -159,9 +164,24 @@ body.entering-project canvas{filter:blur(4px) brightness(0.68) saturate(0.82);op
 /* ── SAT MODAL ── */
 #sat-img-slot{width:100%;aspect-ratio:4/3;border-radius:12px;border:1.5px dashed var(--forest-dim);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(58,79,40,0.05);color:var(--ink-dim);font-family:'DM Mono',monospace;font-size:11px;cursor:pointer;transition:background 0.2s,border-color 0.2s;position:relative;overflow:hidden;}
 #sat-img-slot:hover{background:rgba(58,79,40,0.1);border-color:var(--forest);}
+#sat-img-slot.has-image{border-style:solid;}
+#sat-img-slot.has-image::after{content:"";position:absolute;inset:0;border-radius:11px;box-shadow:inset 0 0 0 0 rgba(242,234,216,0),inset 0 0 0 0 rgba(58,79,40,0);transition:box-shadow 0.2s,background 0.2s;pointer-events:none;}
+#sat-img-slot.has-image:hover::after{background:rgba(30,40,16,0.08);box-shadow:inset 0 0 0 2px rgba(242,234,216,0.8),inset 0 0 0 4px rgba(58,79,40,0.8);}
+#sat-img-slot.has-image.selected{border-color:var(--forest);box-shadow:0 0 0 3px rgba(58,79,40,0.22),0 16px 34px rgba(30,40,16,0.18);}
+#sat-img-slot.has-image.selected::after{box-shadow:inset 0 0 0 2px var(--cream),inset 0 0 0 5px var(--forest);}
 #sat-img-slot svg{width:32px;height:32px;opacity:0.35;}
 #sat-img-slot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:11px;}
 #sat-img-slot input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+
+/* ── IMAGE LIGHTBOX ── */
+#image-lightbox{position:fixed;inset:0;z-index:140;display:flex;align-items:center;justify-content:center;background:rgba(30,40,16,0.72);backdrop-filter:blur(14px);opacity:0;pointer-events:none;transition:opacity 0.22s;}
+#image-lightbox.open{opacity:1;pointer-events:all;}
+.lightbox-frame{position:relative;width:min(92vw,1100px);height:min(84vh,760px);display:flex;align-items:center;justify-content:center;}
+#lightbox-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:14px;border:2px solid rgba(242,234,216,0.88);box-shadow:0 30px 90px rgba(0,0,0,0.38),0 0 0 8px rgba(58,79,40,0.34);background:rgba(242,234,216,0.1);transform:scale(0.94);transition:transform 0.22s;}
+#image-lightbox.open #lightbox-img{transform:scale(1);}
+.lightbox-close{position:absolute;top:-18px;right:-18px;width:42px;height:42px;border-radius:50%;border:1px solid rgba(242,234,216,0.72);background:var(--surface);color:var(--forest);font-family:'DM Mono',monospace;font-size:18px;cursor:pointer;box-shadow:0 10px 28px rgba(30,40,16,0.24);transition:transform 0.18s,background 0.18s;}
+.lightbox-close:hover{transform:translateY(-1px);background:var(--cream);}
+.lightbox-caption{position:absolute;left:0;right:0;bottom:-34px;text-align:center;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream);}
 
 body.hovering{cursor:pointer;}
 @media (max-width:720px){
@@ -181,6 +201,8 @@ body.hovering{cursor:pointer;}
   .m-title{font-size:clamp(22px,8vw,34px);}
   .m-expanded{width:92vw;}
   .exp-header,.exp-body{padding-left:24px;padding-right:24px;}
+  .lightbox-close{top:8px;right:8px;}
+  .lightbox-caption{bottom:8px;padding:0 54px;}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{transition:none!important;animation:none!important;}
@@ -196,7 +218,7 @@ body.hovering{cursor:pointer;}
     <h1>Kaleb <span>Key</span></h1>
     <div id="info-trigger" title="About me">i</div>
   </div>
-  <div id="hud-tagline">Robotics · HCI · Industrial Design · Engineering</div>
+  <div id="hud-tagline">Robotics · Engineering · HCI · Industrial Design</div>
 </div>
 
 <!-- Info panel -->
@@ -213,10 +235,6 @@ body.hovering{cursor:pointer;}
   <div class="ct-row">
     <div class="ct-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div>
     <div><div class="ct-lbl">GitHub</div><div class="ct-val"><a href="https://github.com/kalebkey" target="_blank">github.com/kalebkey</a></div></div>
-  </div>
-  <div class="ct-row">
-    <div class="ct-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-    <div><div class="ct-lbl">Website</div><div class="ct-val"><a href="https://www.kalebkey.info" target="_blank">kalebkey.info</a></div></div>
   </div>
   <div class="ct-row">
     <div class="ct-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></div>
@@ -316,6 +334,14 @@ body.hovering{cursor:pointer;}
       <span>Click to add image</span>
       <input type="file" accept="image/*" id="sat-file">
     </div>
+  </div>
+</div>
+
+<div id="image-lightbox" aria-hidden="true">
+  <div class="lightbox-frame">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Close expanded image">×</button>
+    <img id="lightbox-img" src="" alt="">
+    <div class="lightbox-caption" id="lightbox-caption"></div>
   </div>
 </div>
 
@@ -914,11 +940,16 @@ document.addEventListener('click',e=>{if(!infoPanel.contains(e.target)&&e.target
 const projOverlay=document.getElementById('proj-overlay');
 const projCard=document.getElementById('proj-card');
 const projExpanded=document.getElementById('proj-expanded');
+const imageLightbox=document.getElementById('image-lightbox');
+const lightboxImg=document.getElementById('lightbox-img');
+const lightboxCaption=document.getElementById('lightbox-caption');
 let curProj=null,curDisc=null;
 
 document.getElementById('proj-close').addEventListener('click',closeProjModal);
 document.getElementById('btn-expand').addEventListener('click',showExpanded);
 document.getElementById('btn-back').addEventListener('click',showCard);
+document.getElementById('lightbox-close').addEventListener('click',closeImageLightbox);
+imageLightbox.addEventListener('click',e=>{if(e.target===imageLightbox)closeImageLightbox();});
 ui.projPrev.addEventListener('click',()=>navigateProject(-1));
 ui.projNext.addEventListener('click',()=>navigateProject(1));
 ui.dockPrev.addEventListener('click',()=>focusDotByIndex(focusedDotIndex-1,true));
@@ -946,6 +977,31 @@ projOverlay.addEventListener('click',e=>{if(e.target===projOverlay)closeProjModa
 
 function showCard(){projExpanded.classList.remove('visible');projCard.classList.remove('hidden');}
 function renderTags(tags){return tags.map(t=>`<span class="tag">${t}</span>`).join('');}
+function clearSelectedImage(){
+  document.querySelectorAll('.gslot.selected,#sat-img-slot.selected').forEach(el=>el.classList.remove('selected'));
+}
+function openImageLightbox(src,alt,caption,slot){
+  if(!src)return;
+  clearSelectedImage();
+  if(slot)slot.classList.add('selected');
+  lightboxImg.src=src;
+  lightboxImg.alt=alt||caption||'Expanded project image';
+  lightboxCaption.textContent=caption||'';
+  imageLightbox.classList.add('open');
+  imageLightbox.setAttribute('aria-hidden','false');
+}
+function closeImageLightbox(){
+  imageLightbox.classList.remove('open');
+  imageLightbox.setAttribute('aria-hidden','true');
+  clearSelectedImage();
+  setTimeout(()=>{
+    if(!imageLightbox.classList.contains('open')){
+      lightboxImg.src='';
+      lightboxImg.alt='';
+      lightboxCaption.textContent='';
+    }
+  },240);
+}
 function setProjectModalContent(proj,disc){
   curProj=proj; curDisc=disc;
   document.getElementById('pc-cat').textContent=disc.label;
@@ -978,7 +1034,12 @@ function showExpanded(){
   }else{
   (curProj.images||[]).forEach((src,i)=>{
     const sl=document.createElement('div'); sl.className='gslot';
-    if(src){ sl.innerHTML=`<img src="${src}" alt="${curProj.name} image ${i+1}">`; }
+    if(src){
+      const alt=`${curProj.name} image ${i+1}`;
+      sl.classList.add('has-image');
+      sl.innerHTML=`<img src="${src}" alt="${alt}">`;
+      sl.addEventListener('click',()=>openImageLightbox(src,alt,alt,sl));
+    }
     else { sl.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Image coming soon</span>`; }
     gal.appendChild(sl);
   });
@@ -1024,6 +1085,7 @@ function startProjectEntry(dot){
   };
 }
 function closeProjModal(){
+  closeImageLightbox();
   projOverlay.classList.remove('open');
   document.body.classList.remove('entering-project');
   entryState=null;
@@ -1045,16 +1107,22 @@ function openSatModal(idx){
   document.getElementById('sat-lbl-el').textContent=`Satellite ${String(idx+1).padStart(2,'0')}`;
   const slot=document.getElementById('sat-img-slot');
   const src=SAT_IMAGES[idx];
+  slot.classList.remove('has-image','selected');
   if(src){
-    slot.innerHTML=`<img src="${src}" alt="Satellite ${idx+1}">`;
+    const alt=`Satellite ${idx+1}`;
+    slot.classList.add('has-image');
+    slot.innerHTML=`<img src="${src}" alt="${alt}">`;
+    slot.onclick=()=>openImageLightbox(src,alt,alt,slot);
   } else {
     slot.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><span>Image coming soon</span>`;
+    slot.onclick=null;
   }
   satOverlay.classList.add('open'); autoRotate=false;
 }
-function closeSatModal(){satOverlay.classList.remove('open');setTimeout(()=>{autoRotate=true;},400);}
+function closeSatModal(){closeImageLightbox();satOverlay.classList.remove('open');setTimeout(()=>{autoRotate=true;},400);}
 
 document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&imageLightbox.classList.contains('open')){closeImageLightbox();return;}
   if(e.key==='Escape'&&!ui.splash.classList.contains('hidden')){showGlobe();return;}
   if(e.key==='Escape'&&!ui.simpleView.classList.contains('hidden')){showGlobe();return;}
   if(e.key==='Escape'){closeProjModal();closeSatModal();}
