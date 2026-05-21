@@ -522,9 +522,14 @@ DISCS.forEach((disc,di) => {
     const phi=disc.center.p+Math.cos(angle)*ro*0.85+(i*0.09%0.14-0.07)*shape.jitter;
     const pos=sph(theta,phi,R);
     const dotMesh=new THREE.Mesh(new THREE.SphereGeometry(0.026,10,10),new THREE.MeshBasicMaterial({color:disc.hex}));
+    const dotOutline=new THREE.LineSegments(
+      new THREE.WireframeGeometry(new THREE.SphereGeometry(0.034,12,10)),
+      new THREE.LineBasicMaterial({color:0xf2ead8,transparent:true,opacity:0.82,depthWrite:false})
+    );
+    dotMesh.add(dotOutline);
     dotMesh.position.copy(pos); world.add(dotMesh);
     continentVisuals[disc.id].dots.push(dotMesh);
-    dotObjs.push({mesh:dotMesh,project:proj,discipline:disc,pos:pos.clone()});
+    dotObjs.push({mesh:dotMesh,outline:dotOutline,project:proj,discipline:disc,pos:pos.clone()});
     pts.push(pos.clone()); allPos.push(pos.clone()); allOwner.push(di);
   });
 
@@ -1226,7 +1231,14 @@ function animate(){
   if(hovMoon||hovSat)document.body.classList.add('hovering');
   else if(!hovDot)document.body.classList.remove('hovering');
 
-  dotObjs.forEach((d,i)=>{const selected=entryState&&entryState.dot.mesh===d.mesh;const s=selected?2.85:(hovDot&&d.mesh===hovDot.mesh)?2.2:d.mesh.userData.legendBoost?1.85:(1+0.18*Math.sin(t*1.5+i*0.85));d.mesh.scale.setScalar(s);});
+  dotObjs.forEach((d,i)=>{
+    const selected=entryState&&entryState.dot.mesh===d.mesh;
+    const hovered=hovDot&&d.mesh===hovDot.mesh;
+    const boosted=d.mesh.userData.legendBoost;
+    const s=selected?2.85:hovered?2.2:boosted?1.85:(1+0.18*Math.sin(t*1.5+i*0.85));
+    d.mesh.scale.setScalar(s);
+    if(d.outline)d.outline.material.opacity=selected||hovered?1:boosted?0.95:0.82;
+  });
   moon.scale.setScalar((hovMoon?1.22:1)+0.06*Math.sin(t*2.0));
   renderer.render(scene,camera);
 }
